@@ -1,6 +1,6 @@
 [![version](https://img.shields.io/badge/version-2.0.19-green.svg)](https://github.com/steevanb/docker-php-code-fixer/tree/2.0.19)
 [![php](https://img.shields.io/badge/docker-blue.svg)](https://php.net)
-![Lines](https://img.shields.io/badge/code%20lines-107-green.svg)
+![Lines](https://img.shields.io/badge/code%20lines-105-green.svg)
 
 docker-php-code-fixer
 =====================
@@ -65,9 +65,7 @@ jobs:
         working_directory: /var/php-code-fixer
         steps:
             - checkout
-            - attach_workspace:
-                at: .
             - run:
                 name: PhpCodeFixer
-                command: phpcf --exclude=/vendor/,/var/ .
+                command: phpcf .
 ```
