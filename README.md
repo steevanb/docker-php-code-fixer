@@ -1,6 +1,6 @@
 [![version](https://img.shields.io/badge/version-2.0.19-green.svg)](https://github.com/steevanb/docker-php-code-fixer/tree/2.0.19)
 [![php](https://img.shields.io/badge/docker-blue.svg)](https://php.net)
-![Lines](https://img.shields.io/badge/code%20lines-927-green.svg)
+![Lines](https://img.shields.io/badge/code%20lines-107-green.svg)
 
 docker-php-code-fixer
 =====================
@@ -52,4 +52,22 @@ docker run \
     -w /var/php-code-fixer \
     steevanb/php-code-fixer:2.0.19 \
     phpcf --target=7.3 /var/php-code-fixer
+```
+
+Example of how using it with CircleCI:
+```yaml
+version: '2.1'
+
+jobs:
+    phpcf:
+        docker:
+            - image: steevanb/php-code-fixer:2.0.19
+        working_directory: /var/php-code-fixer
+        steps:
+            - checkout
+            - attach_workspace:
+                at: .
+            - run:
+                name: PhpCodeFixer
+                command: phpcf --exclude=/vendor/,/var/ .
 ```
