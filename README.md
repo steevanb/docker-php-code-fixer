@@ -2,8 +2,7 @@
 [![php](https://img.shields.io/badge/docker-blue.svg)](https://php.net)
 ![Lines](https://img.shields.io/badge/code%20lines-105-green.svg)
 
-docker-php-code-fixer
-=====================
+## docker-php-code-fixer
 
 Docker container for [wapmorgan/PhpCodeFixer](https://github.com/wapmorgan/PhpCodeFixer).
 
@@ -13,48 +12,39 @@ follow [wapmorgan/PhpCodeFixer](https://github.com/wapmorgan/PhpCodeFixer) versi
 
 If some fix has to be made on this repository, we will add a 4th level in version, like 2.0.19`.1`.
 
-Installation
-============
+## Installation
 
 You don't need to install this repository, use the Docker image directly.
 
-Usage
-====
+## Usage
 
-You can use a script like this one to launch Docker container who will test all files into `/var/php-code-fixer`:
+### Locally
 
-```bash
-#!/usr/bin/env sh
-
-readonly PROJECT_DIRECTORY=$(realpath $(dirname $(realpath $0)))
-
-set -e
-
-docker run \
-    --rm \
-    -v ${PROJECT_DIRECTORY}:/var/php-code-fixer:ro \
-    -w /var/php-code-fixer \
-    steevanb/php-code-fixer:2.0.19
-```
-
-To add some parameters to PhpCodeFixer:
+Create `bin/phpcf`: 
 
 ```bash
 #!/usr/bin/env sh
 
-readonly PROJECT_DIRECTORY=$(realpath $(dirname $(realpath $0)))
-
 set -e
 
-docker run \
-    --rm \
-    -v ${PROJECT_DIRECTORY}:/var/php-code-fixer:ro \
-    -w /var/php-code-fixer \
-    steevanb/php-code-fixer:2.0.19 \
-    phpcf --target=7.3 /var/php-code-fixer
+if [ $(which docker || false) ]; then
+    readonly PROJECT_DIRECTORY=$(realpath $(dirname $(realpath $0))/..)
+    docker run \
+        --rm \
+        -it \
+        -v ${PROJECT_DIRECTORY}:/var/php-code-fixer:ro \
+        -w /var/php-code-fixer \
+        steevanb/php-code-fixer:2.0.19 \
+        bin/phpcf
+else
+    phpcf --exclude=/vendor/ .
+fi
 ```
 
-Example of how using it with CircleCI:
+### Integration with CircleCI
+
+Add phpcf in `.circleci/config.yml`:
+
 ```yaml
 version: '2.1'
 
@@ -66,6 +56,12 @@ jobs:
         steps:
             - checkout
             - run:
-                name: PhpCodeFixer
-                command: phpcf .
+                  name: phpcf
+                  command: bin/phpcf
+
+workflows:
+    version: '2.1'
+    Code quality:
+        jobs:
+            - phpcf
 ```
