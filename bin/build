@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+set -eu
+
+readonly PROJECT_DIRECTORY="$(realpath $(dirname $(realpath $0))/..)"
+readonly DOCKER_IMAGE_NAME="steevanb/php-code-fixer"
+readonly DOCKER_IMAGE_TAG_VERSION="${DOCKER_IMAGE_NAME}:2.0.23"
+readonly DOCKER_IMAGE_TAG_LATEST="${DOCKER_IMAGE_NAME}:latest"
+
+dockerQuiet="-q"
+dockerNoCache=""
+push=false
+isLatest=false
+for param in "$@"; do
+    if [ "${param}" == "-v" ]; then
+        dockerQuiet=""
+    elif [ "${param}" == "--no-cache" ]; then
+        dockerNoCache="--no-cache"
+    elif [ "${param}" == "--push" ]; then
+        push=true
+    elif [ "${param}" == "--latest" ]; then
+        isLatest=true
+    fi
+done
+
+build() {
+    docker \
+        build \
+        "${PROJECT_DIRECTORY}" \
+        --file=docker/Dockerfile \
+        -t "${1}" \
+        ${dockerQuiet} \
+        ${dockerNoCache}
+}
+
+dockerHubLogin() {
+    docker logout
+    docker login --username=steevanb
+}
+
+push() {
+    docker push "${1}"
+}
+
+build "${DOCKER_IMAGE_TAG_VERSION}"
+if [ ${push} == true ]; then
+    dockerHubLogin
+    push "${DOCKER_IMAGE_TAG_VERSION}"
+fi
+
+if [ ${isLatest} == true ]; then
+    docker tag "${DOCKER_IMAGE_TAG_VERSION}" "${DOCKER_IMAGE_TAG_LATEST}"
+    if [ ${push} == true ]; then
+        push "${DOCKER_IMAGE_TAG_LATEST}"
+    fi
+fi
